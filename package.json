@@ -1,0 +1,27 @@
+{
+  "name": "@sms/ts-sdk-generator",
+  "version": "1.0.0",
+  "description": "Typescript sdk generator",
+  "main": "index.js",
+  "author": "Romain Guillot <romain.guillot@symphony.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@types/fs-extra": "8.1.0",
+    "@types/js-beautify": "~1.8.0",
+    "@types/mustache": "~4.1.0",
+    "@types/node": "^11.0.0",
+    "commander": "^6.2.1",
+    "fs-extra": "^9.0.1",
+    "swagger-typescript-codegen": "^3.2.1",
+    "typescript": "3.9.7"
+  },
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "generate": "node ./dist/index.js",
+    "build:sdk": "tsc -p tsconfig.sdk.json"
+  },
+  "bin": {
+    "generate-ts-sdk": "node dist/index.js"
+  }
+}

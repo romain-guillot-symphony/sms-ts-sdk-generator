@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": false,
+    "target": "es6",
+    "moduleResolution": "node",
+    "typeRoots": [ "node_modules/@types" ],
+    "types": [
+      "js-beautify",
+      "node"
+    ],
+    "outDir": "dist/"
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}
