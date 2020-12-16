@@ -6,10 +6,10 @@ Generates typescript interfaces and apis based on a Swagger specification given 
 
 Add this package as dev dependency to your project in your package.json
 ```
-'@sms/ts-sdk-generator': 'https://github.com/romain-guillot-symphony/sms-ts-sdk-generator.git'
+"@sms/ts-sdk-generator": "https://github.com/romain-guillot-symphony/sms-ts-sdk-generator.git"
 ```
 
 Run the following command
 ```
-generate-ts-sdk --swager PATH-TO-SWAGGER-FILE --outDir PATH-TO-SDK-FOLDER
+generate-ts-sdk --swagger PATH-TO-SWAGGER-FILE --outDir PATH-TO-SDK-FOLDER
 ```

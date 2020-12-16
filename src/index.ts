@@ -1,3 +1,5 @@
+#! /usr/bin/env node
+
 import { CodeGen } from 'swagger-typescript-codegen'; 
 import { readFileSync } from 'fs';
 import { join } from 'path';

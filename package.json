@@ -22,6 +22,6 @@
     "build:sdk": "tsc -p tsconfig.sdk.json"
   },
   "bin": {
-    "generate-ts-sdk": "node dist/index.js"
+    "generate-ts-sdk": "dist/index.js"
   }
 }
