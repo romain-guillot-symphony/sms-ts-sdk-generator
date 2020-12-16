@@ -1,10 +1,8 @@
 #! /usr/bin/env node
 
 import { CodeGen } from 'swagger-typescript-codegen'; 
-import { readFileSync } from 'fs';
-import { join } from 'path';
 import { Command } from 'commander';
-import { cleanupDir, getTsFilename, readfile, renderFile } from './helpers';
+import { cleanupDir, filterRedondentValues, getTemplateFile, getTsFilename, readfile, renderFile } from './helpers';
 
 const program = new Command();
 program
@@ -17,25 +15,34 @@ const swagger = JSON.parse(readfile(program.swagger));
 const swaggerObject = CodeGen.getDataAndOptionsForGeneration({swagger});
 
 // Templates
-const exportsMustache = readFileSync(join(__dirname, '..', 'templates/exports.mustache')).toString();
-const interfaceMustache = readFileSync(join(__dirname, '..', 'templates/interface.mustache')).toString();
+const exportsMustache = getTemplateFile('exports');
+const interfaceMustache = getTemplateFile('interface');
+const apiMustache = getTemplateFile('api');
 
 // Generate models
 const modelsBasePath = `${program.outDir}/models`;
 cleanupDir(modelsBasePath);
-renderFile(`${modelsBasePath}/${getTsFilename('index')}`, exportsMustache, {exports: swaggerObject.data.definitions});
+renderFile(`${modelsBasePath}/${getTsFilename('index')}`, exportsMustache, {exports: swaggerObject.data.definitions.map((def) => def.name)});
 for (const def of swaggerObject.data.definitions) {
   // get imports and remove duplicates
-  // const tsAllImports = [];
-  // for (const p of (def.tsType.properties || [])) {
-    
-  // }
   const propNames = (def.tsType.properties || []).map((prop) => prop.target || prop.isArray && (prop as any).elementType.target);
-  if (def.name === 'IQuoteRequest') {
-    console.log(def.tsType);
-  }
-  const tsImports = propNames.filter((el, index) => propNames.indexOf(el) === index);
+  const tsImports = filterRedondentValues(propNames);
   const filePath = `${modelsBasePath}/${getTsFilename(def.name)}`;
-  renderFile(filePath, interfaceMustache, Object.assign({}, def, {tsImports}));
+  renderFile(filePath, interfaceMustache, {...def, tsImports});
 }
 
+// Generate APIs
+const apisBasePath = `${program.outDir}/apis`;
+cleanupDir(apisBasePath);
+renderFile(`${apisBasePath}/${getTsFilename('index')}`, exportsMustache, {exports: swaggerObject.data.methods.map((m) => m.summary)});
+for (const api of swaggerObject.data.methods) {
+  const filePath = `${apisBasePath}/${getTsFilename(api.summary)}`;
+  const imports = api.successfulResponseTypeIsRef ? [api.successfulResponseType] : [];
+  for (const param of api.parameters) {
+    if (param.tsType.isRef) {
+      imports.push(param.tsType.target);
+    }
+  }
+  const tsImports = filterRedondentValues(imports);
+  renderFile(filePath, apiMustache, {...api, tsImports});
+}

@@ -1,0 +1,38 @@
+{{#tsImports}}
+import { {{.}} } from '../models';
+{{/tsImports}}
+
+export interface {{summary}}Parameters {
+  {{#parameters}}
+  '{{{name}}}'{{^required}}?{{/required}}: {{#tsType}}{{#isRef}}{{target}}{{/isRef}}{{^isRef}}{{{tsType}}}{{/isRef}}{{/tsType}};
+  {{/parameters}}
+}
+
+const BASE_API = 'https://BASE-BOT-API';
+
+/**
+ * {{#deprecated}}@deprecated{{/deprecated}}
+ */
+export async function {{summary}}(parameters: {{summary}}Parameters): Promise<{{successfulResponseType}}> {
+  const requestParameters: RequestInit = {
+    method: '{{method}}',
+    headers: {'Content-Type': 'application/json'},
+    {{#isPOST}}body: JSON.stringify(parameters){{/isPOST}}
+  };
+  // TODO add query parameters
+  const request = fetch(`${BASE_API}{{{pathFormatString}}}`, requestParameters);
+  try {
+    const response: Response = await request;
+    if (response.status === 200) {
+      const rawData = await response.json();
+      return rawData as {{successfulResponseType}};
+    } else if (response.status === 204 && ('{{successfulResponseType}}' as any) === 'void') {
+      return;
+    } else {
+      throw new Error('Failed on request');
+    }
+  } catch (err: any) {
+    console.error('Failed to fetch', err);
+    throw err;
+  }
+}

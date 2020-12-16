@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { emptyDirSync } from 'fs-extra';
 import * as Mustache from 'mustache';
+import { join } from 'path';
 
 /**
  * Read a file
@@ -36,4 +37,20 @@ export const renderFile = (filePath: string, mustacheTemplate: string, data: any
     Mustache.render(mustacheTemplate, data),
     'utf8'
   );
+};
+
+/**
+ * Returns the Mustache template file
+ * @param templateName 
+ */
+export const getTemplateFile = (templateName: string) => {
+  return readFileSync(join(__dirname, '..', `templates/${templateName}.mustache`)).toString();
+};
+
+/**
+ * Remove the duplicate values fron an array of strings
+ * @param arr 
+ */
+export const filterRedondentValues = (arr: string[]) => {
+  return arr.filter((el, index) => arr.indexOf(el) === index)
 };
