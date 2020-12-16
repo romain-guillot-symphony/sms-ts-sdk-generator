@@ -23,12 +23,19 @@ const interfaceMustache = readFileSync(join(__dirname, '..', 'templates/interfac
 // Generate models
 const modelsBasePath = `${program.outDir}/models`;
 cleanupDir(modelsBasePath);
-renderFile(`${modelsBasePath}/index.ts`, exportsMustache, {exports: swaggerObject.data.definitions});
+renderFile(`${modelsBasePath}/${getTsFilename('index')}`, exportsMustache, {exports: swaggerObject.data.definitions});
 for (const def of swaggerObject.data.definitions) {
   // get imports and remove duplicates
-  const propNames = (def.tsType.properties || []).map((prop) => prop.target);
-  const dependencies = propNames.filter((el, index) => propNames.indexOf(el) === index);
+  // const tsAllImports = [];
+  // for (const p of (def.tsType.properties || [])) {
+    
+  // }
+  const propNames = (def.tsType.properties || []).map((prop) => prop.target || prop.isArray && (prop as any).elementType.target);
+  if (def.name === 'IQuoteRequest') {
+    console.log(def.tsType);
+  }
+  const tsImports = propNames.filter((el, index) => propNames.indexOf(el) === index);
   const filePath = `${modelsBasePath}/${getTsFilename(def.name)}`;
-  renderFile(filePath, interfaceMustache, Object.assign({}, def, {dependencies}));
+  renderFile(filePath, interfaceMustache, Object.assign({}, def, {tsImports}));
 }
 

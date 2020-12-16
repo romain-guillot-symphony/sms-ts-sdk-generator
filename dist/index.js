@@ -18,10 +18,13 @@ const exportsMustache = fs_1.readFileSync(path_1.join(__dirname, '..', 'template
 const interfaceMustache = fs_1.readFileSync(path_1.join(__dirname, '..', 'templates/interface.mustache')).toString();
 const modelsBasePath = `${program.outDir}/models`;
 helpers_1.cleanupDir(modelsBasePath);
-helpers_1.renderFile(`${modelsBasePath}/index.ts`, exportsMustache, { exports: swaggerObject.data.definitions });
+helpers_1.renderFile(`${modelsBasePath}/${helpers_1.getTsFilename('index')}`, exportsMustache, { exports: swaggerObject.data.definitions });
 for (const def of swaggerObject.data.definitions) {
-    const propNames = (def.tsType.properties || []).map((prop) => prop.target);
-    const dependencies = propNames.filter((el, index) => propNames.indexOf(el) === index);
+    const propNames = (def.tsType.properties || []).map((prop) => prop.target || prop.isArray && prop.elementType.target);
+    if (def.name === 'IQuoteRequest') {
+        console.log(def.tsType);
+    }
+    const tsImports = propNames.filter((el, index) => propNames.indexOf(el) === index);
     const filePath = `${modelsBasePath}/${helpers_1.getTsFilename(def.name)}`;
-    helpers_1.renderFile(filePath, interfaceMustache, Object.assign({}, def, { dependencies }));
+    helpers_1.renderFile(filePath, interfaceMustache, Object.assign({}, def, { tsImports }));
 }

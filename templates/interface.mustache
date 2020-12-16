@@ -1,21 +1,21 @@
-{{#dependencies}}
+{{#tsImports}}
 {{#.}}
-import { {{ . }} } from '../models';
+import { {{ . }} } from './{{ . }}';
 {{/.}}
-{{/dependencies}}
+{{/tsImports}}
 
 export interface {{name}} {
-    {{#tsType}}
-    {{#properties}}
-    {{#isRef}}
-    {{name}}{{^isRequired}}?{{/isRequired}}: {{target}};
-    {{/isRef}}
-    {{#isAtomic}}
-    {{name}}{{^isRequired}}?{{/isRequired}}: {{{tsType}}};
-    {{/isAtomic}}
-    {{#isArray}}
-    {{name}}{{^isRequired}}?{{/isRequired}}: {{#elementType}}{{tsType}}{{target}}{{/elementType}};
-    {{/isArray}}
-    {{/properties}}
-    {{/tsType}}
+  {{#tsType}}
+  {{#properties}}
+  {{#isRef}}
+  {{name}}{{^isRequired}}?{{/isRequired}}: {{target}};
+  {{/isRef}}
+  {{#isAtomic}}
+  {{name}}{{^isRequired}}?{{/isRequired}}: {{{tsType}}};
+  {{/isAtomic}}
+  {{#isArray}}
+  {{name}}{{^isRequired}}?{{/isRequired}}: {{#elementType}}{{#isRef}}{{target}}{{/isRef}}{{^isRef}}{{tsType}}{{/isRef}}{{/elementType}}[];
+  {{/isArray}}
+  {{/properties}}
+  {{/tsType}}
 }
