@@ -31,7 +31,7 @@ export async function {{summary}}(parameters: {{summary}}Parameters): Promise<{{
     } else {
       throw new Error('Failed on request');
     }
-  } catch (err: any) {
+  } catch (err) {
     console.error('Failed to fetch', err);
     throw err;
   }

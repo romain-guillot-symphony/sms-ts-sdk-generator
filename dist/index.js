@@ -19,7 +19,7 @@ const modelsBasePath = `${program.outDir}/models`;
 helpers_1.cleanupDir(modelsBasePath);
 helpers_1.renderFile(`${modelsBasePath}/${helpers_1.getTsFilename('index')}`, exportsMustache, { exports: swaggerObject.data.definitions.map((def) => def.name) });
 for (const def of swaggerObject.data.definitions) {
-    const propNames = (def.tsType.properties || []).map((prop) => prop.target || prop.isArray && prop.elementType.target);
+    const propNames = (def.tsType.isArray ? [def.tsType] : def.tsType.properties || []).map((prop) => prop.target || prop.isArray && prop.elementType.target);
     const tsImports = helpers_1.filterRedondentValues(propNames);
     const filePath = `${modelsBasePath}/${helpers_1.getTsFilename(def.name)}`;
     helpers_1.renderFile(filePath, interfaceMustache, Object.assign(Object.assign({}, def), { tsImports }));

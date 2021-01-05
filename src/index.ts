@@ -25,7 +25,7 @@ cleanupDir(modelsBasePath);
 renderFile(`${modelsBasePath}/${getTsFilename('index')}`, exportsMustache, {exports: swaggerObject.data.definitions.map((def) => def.name)});
 for (const def of swaggerObject.data.definitions) {
   // get imports and remove duplicates
-  const propNames = (def.tsType.properties || []).map((prop) => prop.target || prop.isArray && (prop as any).elementType.target);
+  const propNames = (def.tsType.isArray ? [def.tsType] : def.tsType.properties || []).map((prop) => prop.target || prop.isArray && (prop as any).elementType.target);
   const tsImports = filterRedondentValues(propNames);
   const filePath = `${modelsBasePath}/${getTsFilename(def.name)}`;
   renderFile(filePath, interfaceMustache, {...def, tsImports});
