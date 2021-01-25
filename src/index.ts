@@ -19,6 +19,9 @@ const exportsMustache = getTemplateFile('exports');
 const interfaceMustache = getTemplateFile('interface');
 const apiMustache = getTemplateFile('api');
 
+// Properties to ignore
+const ignorePropertiesNames = ['canonMajorVersion', 'canonMinorVersion', 'canonType', 'canonUnknownKeys', 'jsonDomNode', 'jsonObject'];
+
 // Generate models
 const modelsBasePath = `${program.outDir}/models`;
 cleanupDir(modelsBasePath);
@@ -27,6 +30,7 @@ for (const def of swaggerObject.data.definitions) {
   // get imports and remove duplicates
   const propNames = (def.tsType.isArray ? [def.tsType] : def.tsType.properties || []).map((prop) => prop.target || prop.isArray && (prop as any).elementType.target);
   const tsImports = filterRedondentValues(propNames);
+  (def.tsType as any).properties = (def.tsType.properties || []).filter((prop) => ignorePropertiesNames.indexOf(prop.name) === -1);
   const filePath = `${modelsBasePath}/${getTsFilename(def.name)}`;
   renderFile(filePath, interfaceMustache, {...def, tsImports});
 }
