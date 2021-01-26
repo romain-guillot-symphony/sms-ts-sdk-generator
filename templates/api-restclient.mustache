@@ -1,0 +1,48 @@
+// @ts-ignore
+import { RestClient } from 'symphony-bdk-ui-toolkit';
+import { AxiosResponse } from 'axios';
+{{#tsImports}}
+import { {{.}} } from '../models';
+{{/tsImports}}
+
+export interface {{summary}}Parameters {
+  {{#parameters}}
+  '{{{name}}}'{{^required}}?{{/required}}: {{#tsType}}{{#isRef}}{{target}}{{/isRef}}{{^isRef}}{{{tsType}}}{{/isRef}}{{/tsType}};
+  {{/parameters}}
+}
+
+/**
+ * {{#deprecated}}@deprecated{{/deprecated}}
+ */
+export async function {{summary}}(parameters: {{summary}}Parameters): Promise<{{successfulResponseType}}> {
+  const queryParameters = {
+    {{#parameters}}
+    {{#isQueryParameter}}
+    '{{{name}}}': parameters['{{{name}}}'],
+    {{/isQueryParameter}}
+    {{/parameters}}
+  };
+  {{^isGET}}
+  const body = {
+    {{#parameters}}
+    {{#isBodyParameter}}
+    '{{{name}}}': parameters['{{{name}}}'],
+    {{/isBodyParameter}}
+    {{/parameters}}
+  };
+  {{/isGET}}
+  try {
+    const request: Promise<AxiosResponse<{{successfulResponseType}}>> = RestClient.{{method}}(
+      `{{{pathFormatString}}}`,{{^isGET}} body,{{/isGET}} queryParameters
+    );
+    const response = await request;
+    if (response.status === 200 || response.status === 204) {
+      return response.data;
+    } else {
+      throw new Error('Failed on request');
+    }
+  } catch (err) {
+    console.error('Failed to fetch', err);
+    throw err;
+  }
+}

@@ -34,7 +34,7 @@ export const renderFile = (filePath: string, mustacheTemplate: string, data: any
   console.info(`Generating ${filePath}`);
   writeFileSync(
     filePath, 
-    Mustache.render(mustacheTemplate, data),
+    Mustache.render(mustacheTemplate, data, ),
     'utf8'
   );
 };

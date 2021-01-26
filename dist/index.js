@@ -14,15 +14,20 @@ const swagger = JSON.parse(helpers_1.readfile(program.swagger));
 const swaggerObject = swagger_typescript_codegen_1.CodeGen.getDataAndOptionsForGeneration({ swagger });
 const exportsMustache = helpers_1.getTemplateFile('exports');
 const interfaceMustache = helpers_1.getTemplateFile('interface');
-const apiMustache = helpers_1.getTemplateFile('api');
-const ignorePropertiesNames = ['canonMajorVersion', 'canonMinorVersion', 'canonType', 'canonUnknownKeys', 'jsonDomNode', 'jsonObject'];
+const apiRestClientMustache = helpers_1.getTemplateFile('api-restclient');
+const definitionsToIgnore = ['Iterator«string»'];
+const propertiesNamesToIgnore = ['canonMajorVersion', 'canonMinorVersion', 'canonType', 'canonUnknownKeys', 'jsonDomNode', 'jsonObject', 'nameIterator', 'sortedNameIterator'];
 const modelsBasePath = `${program.outDir}/models`;
+const definitions = swaggerObject.data.definitions.filter((def) => definitionsToIgnore.indexOf(def.name) === -1);
 helpers_1.cleanupDir(modelsBasePath);
-helpers_1.renderFile(`${modelsBasePath}/${helpers_1.getTsFilename('index')}`, exportsMustache, { exports: swaggerObject.data.definitions.map((def) => def.name) });
-for (const def of swaggerObject.data.definitions) {
-    const propNames = (def.tsType.isArray ? [def.tsType] : def.tsType.properties || []).map((prop) => prop.target || prop.isArray && prop.elementType.target);
-    const tsImports = helpers_1.filterRedondentValues(propNames);
-    def.tsType.properties = (def.tsType.properties || []).filter((prop) => ignorePropertiesNames.indexOf(prop.name) === -1);
+helpers_1.renderFile(`${modelsBasePath}/${helpers_1.getTsFilename('index')}`, exportsMustache, { exports: definitions.map((def) => def.name) });
+for (const def of definitions) {
+    const propTypes = (def.tsType.isArray ? [def.tsType] : def.tsType.properties || [])
+        .filter((prop) => propertiesNamesToIgnore.indexOf(prop.name) === -1)
+        .map((prop) => prop.target || prop.isArray && prop.elementType.target);
+    const tsImports = helpers_1.filterRedondentValues(propTypes).filter((importName) => definitionsToIgnore.indexOf(importName) === -1);
+    ;
+    def.tsType.properties = (def.tsType.properties || []).filter((prop) => propertiesNamesToIgnore.indexOf(prop.name) === -1);
     const filePath = `${modelsBasePath}/${helpers_1.getTsFilename(def.name)}`;
     helpers_1.renderFile(filePath, interfaceMustache, Object.assign(Object.assign({}, def), { tsImports }));
 }
@@ -38,5 +43,6 @@ for (const api of swaggerObject.data.methods) {
         }
     }
     const tsImports = helpers_1.filterRedondentValues(imports);
-    helpers_1.renderFile(filePath, apiMustache, Object.assign(Object.assign({}, api), { tsImports }));
+    api.method = api.method.toLowerCase();
+    helpers_1.renderFile(filePath, apiRestClientMustache, Object.assign(Object.assign({}, api), { tsImports }));
 }

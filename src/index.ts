@@ -17,20 +17,24 @@ const swaggerObject = CodeGen.getDataAndOptionsForGeneration({swagger});
 // Templates
 const exportsMustache = getTemplateFile('exports');
 const interfaceMustache = getTemplateFile('interface');
-const apiMustache = getTemplateFile('api');
+const apiRestClientMustache = getTemplateFile('api-restclient');
 
-// Properties to ignore
-const ignorePropertiesNames = ['canonMajorVersion', 'canonMinorVersion', 'canonType', 'canonUnknownKeys', 'jsonDomNode', 'jsonObject'];
+// Defitions/Properties to ignore due to Canon model
+const definitionsToIgnore = ['Iterator«string»'];
+const propertiesNamesToIgnore = ['canonMajorVersion', 'canonMinorVersion', 'canonType', 'canonUnknownKeys', 'jsonDomNode', 'jsonObject', 'nameIterator', 'sortedNameIterator'];
 
 // Generate models
 const modelsBasePath = `${program.outDir}/models`;
+const definitions = swaggerObject.data.definitions.filter((def) => definitionsToIgnore.indexOf(def.name) === -1)
 cleanupDir(modelsBasePath);
-renderFile(`${modelsBasePath}/${getTsFilename('index')}`, exportsMustache, {exports: swaggerObject.data.definitions.map((def) => def.name)});
-for (const def of swaggerObject.data.definitions) {
+renderFile(`${modelsBasePath}/${getTsFilename('index')}`, exportsMustache, {exports: definitions.map((def) => def.name)});
+for (const def of definitions) {
   // get imports and remove duplicates
-  const propNames = (def.tsType.isArray ? [def.tsType] : def.tsType.properties || []).map((prop) => prop.target || prop.isArray && (prop as any).elementType.target);
-  const tsImports = filterRedondentValues(propNames);
-  (def.tsType as any).properties = (def.tsType.properties || []).filter((prop) => ignorePropertiesNames.indexOf(prop.name) === -1);
+  const propTypes = (def.tsType.isArray ? [def.tsType] : def.tsType.properties || [])
+    .filter((prop) => propertiesNamesToIgnore.indexOf(prop.name) === -1)
+    .map((prop) => prop.target || prop.isArray && (prop as any).elementType.target);
+  const tsImports = filterRedondentValues(propTypes).filter((importName) => definitionsToIgnore.indexOf(importName) === -1);;
+  (def.tsType as any).properties = (def.tsType.properties || []).filter((prop) => propertiesNamesToIgnore.indexOf(prop.name) === -1);
   const filePath = `${modelsBasePath}/${getTsFilename(def.name)}`;
   renderFile(filePath, interfaceMustache, {...def, tsImports});
 }
@@ -48,5 +52,6 @@ for (const api of swaggerObject.data.methods) {
     }
   }
   const tsImports = filterRedondentValues(imports);
-  renderFile(filePath, apiMustache, {...api, tsImports});
+  (api as any).method = api.method.toLowerCase();
+  renderFile(filePath, apiRestClientMustache, {...api, tsImports});
 }

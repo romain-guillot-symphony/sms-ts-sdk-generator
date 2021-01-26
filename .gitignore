@@ -2,3 +2,4 @@ node_modules
 sdk
 swagger
 dist-sdk
+yarn-error.log
