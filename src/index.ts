@@ -3,6 +3,7 @@
 import { CodeGen } from 'swagger-typescript-codegen'; 
 import { Command } from 'commander';
 import { cleanupDir, filterRedondentValues, getTemplateFile, getTsFilename, readfile, renderFile } from './helpers';
+import { existsSync } from 'fs-extra';
 
 const program = new Command();
 program
@@ -25,11 +26,18 @@ const propertiesNamesToIgnore = ['canonMajorVersion', 'canonMinorVersion', 'cano
 
 // Generate models
 const modelsPath = `${program.outDir}/models`;
-renderFile(`${modelsPath}/${getTsFilename('index')}`, exportsMustache, {exports: ['base']});
-const modelsBasePath = `${modelsPath}/base`;
+const modelsBaseFolderName = 'base';
+const modelsBasePath = `${modelsPath}/${modelsBaseFolderName}`;
 const definitions = swaggerObject.data.definitions.filter((def) => definitionsToIgnore.indexOf(def.name) === -1)
 cleanupDir(modelsBasePath);
-renderFile(`${modelsBasePath}/${getTsFilename('index')}`, exportsMustache, {exports: definitions.map((def) => def.name)});
+if (!existsSync(`${modelsPath}/${getTsFilename('index')}`)) {
+  renderFile(`${modelsPath}/${getTsFilename('index')}`, exportsMustache, {
+    exports: definitions.map((def) => `${modelsBaseFolderName}/${def.name}`), 
+    comment: 'Import your custom models here'
+  });
+} else {
+  console.warn(`${modelsPath}/${getTsFilename('index')} has not been overriden as it contains manual customization, make sure to export the new base models here`);
+}
 for (const def of definitions) {
   // get imports and remove duplicates
   const propTypes = (def.tsType.isArray ? [def.tsType] : def.tsType.properties || [])

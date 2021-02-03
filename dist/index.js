@@ -4,6 +4,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const swagger_typescript_codegen_1 = require("swagger-typescript-codegen");
 const commander_1 = require("commander");
 const helpers_1 = require("./helpers");
+const fs_extra_1 = require("fs-extra");
 const program = new commander_1.Command();
 program
     .usage("[options")
@@ -18,11 +19,19 @@ const apiRestClientMustache = helpers_1.getTemplateFile('api-restclient');
 const definitionsToIgnore = ['Iterator«string»'];
 const propertiesNamesToIgnore = ['canonMajorVersion', 'canonMinorVersion', 'canonType', 'canonUnknownKeys', 'jsonDomNode', 'jsonObject', 'nameIterator', 'sortedNameIterator'];
 const modelsPath = `${program.outDir}/models`;
-helpers_1.renderFile(`${modelsPath}/${helpers_1.getTsFilename('index')}`, exportsMustache, { exports: ['base'] });
-const modelsBasePath = `${modelsPath}/base`;
+const modelsBaseFolderName = 'base';
+const modelsBasePath = `${modelsPath}/${modelsBaseFolderName}`;
 const definitions = swaggerObject.data.definitions.filter((def) => definitionsToIgnore.indexOf(def.name) === -1);
 helpers_1.cleanupDir(modelsBasePath);
-helpers_1.renderFile(`${modelsBasePath}/${helpers_1.getTsFilename('index')}`, exportsMustache, { exports: definitions.map((def) => def.name) });
+if (!fs_extra_1.existsSync(`${modelsPath}/${helpers_1.getTsFilename('index')}`)) {
+    helpers_1.renderFile(`${modelsPath}/${helpers_1.getTsFilename('index')}`, exportsMustache, {
+        exports: definitions.map((def) => `${modelsBaseFolderName}/${def.name}`),
+        comment: 'Import your custom models here'
+    });
+}
+else {
+    console.warn(`${modelsPath}/${helpers_1.getTsFilename('index')} has not been overriden as it contains manual customization, make sure to export the new base models here`);
+}
 for (const def of definitions) {
     const propTypes = (def.tsType.isArray ? [def.tsType] : def.tsType.properties || [])
         .filter((prop) => propertiesNamesToIgnore.indexOf(prop.name) === -1)

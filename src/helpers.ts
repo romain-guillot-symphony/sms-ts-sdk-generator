@@ -1,5 +1,4 @@
-import { readFileSync, writeFileSync } from 'fs';
-import { emptyDirSync, existsSync, mkdirSync } from 'fs-extra';
+import { emptyDirSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs-extra';
 import * as Mustache from 'mustache';
 import { join, dirname } from 'path';
 
