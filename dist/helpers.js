@@ -13,6 +13,9 @@ exports.cleanupDir = (dirPath) => {
 };
 exports.renderFile = (filePath, mustacheTemplate, data) => {
     console.info(`Generating ${filePath}`);
+    if (!fs_extra_1.existsSync(path_1.dirname(filePath))) {
+        fs_extra_1.mkdirSync(path_1.dirname(filePath), { recursive: true });
+    }
     fs_1.writeFileSync(filePath, Mustache.render(mustacheTemplate, data), 'utf8');
 };
 exports.getTemplateFile = (templateName) => {

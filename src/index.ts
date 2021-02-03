@@ -24,7 +24,9 @@ const definitionsToIgnore = ['Iterator«string»'];
 const propertiesNamesToIgnore = ['canonMajorVersion', 'canonMinorVersion', 'canonType', 'canonUnknownKeys', 'jsonDomNode', 'jsonObject', 'nameIterator', 'sortedNameIterator'];
 
 // Generate models
-const modelsBasePath = `${program.outDir}/models`;
+const modelsPath = `${program.outDir}/models`;
+renderFile(`${modelsPath}/${getTsFilename('index')}`, exportsMustache, {exports: ['base']});
+const modelsBasePath = `${modelsPath}/base`;
 const definitions = swaggerObject.data.definitions.filter((def) => definitionsToIgnore.indexOf(def.name) === -1)
 cleanupDir(modelsBasePath);
 renderFile(`${modelsBasePath}/${getTsFilename('index')}`, exportsMustache, {exports: definitions.map((def) => def.name)});

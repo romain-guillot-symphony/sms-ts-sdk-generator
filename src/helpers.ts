@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'fs';
-import { emptyDirSync } from 'fs-extra';
+import { emptyDirSync, existsSync, mkdirSync } from 'fs-extra';
 import * as Mustache from 'mustache';
-import { join } from 'path';
+import { join, dirname } from 'path';
 
 /**
  * Read a file
@@ -32,6 +32,9 @@ export const cleanupDir = (dirPath: string) => {
  */
 export const renderFile = (filePath: string, mustacheTemplate: string, data: any) => {
   console.info(`Generating ${filePath}`);
+  if (!existsSync(dirname(filePath))){
+    mkdirSync(dirname(filePath), {recursive: true});
+  }
   writeFileSync(
     filePath, 
     Mustache.render(mustacheTemplate, data, ),
